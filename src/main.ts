@@ -1,12 +1,33 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
+import createServer, { CreateServerOptions } from "./bootstrap-server/create-server";
+import winstonLogger from "./utils/winston.logger";
+
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  try {
+    winstonLogger.info("Initializing Server")
+    winstonLogger.info(
+      `Running in ${
+        process.env.NODE_ENV === 'production' ? 'production' : 'development'
+      } mode`,
+    );
+  
+    const isProduction = process.env.NODE_ENV === 'production' ? true : false;
 
-  const configService = app.get(ConfigService);
-  const PORT = configService.get<number>('PORT') || 5000;
-  await app.listen(PORT);
+    const whitelisted_origins:string = process.env.WHITE_LISTED_DOMAINS;
+    const whitelistedDomains = whitelisted_origins.split(",");
+  
+    const options: CreateServerOptions = {
+      port: Number(process.env.PORT) || 5000,
+      production: isProduction,
+      whitelistedDomains: whitelistedDomains
+    };
+  
+    await createServer(options);
+  
+    winstonLogger.info(`Server running on port ${options.port}`);
+  } catch (error) {
+    winstonLogger.error(error);
+  }
+
 }
 bootstrap();
