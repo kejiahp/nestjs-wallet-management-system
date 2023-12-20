@@ -5,9 +5,11 @@ import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
-import { PrismaService } from './prisma/prisma.service';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './apps/prisma/prisma.module';
 import { loggerFormat } from './common/utils/winston.logger';
+import { SessionModule } from './apps/session/session.module';
+import { UserModule } from './apps/user/user.module';
+import { AuthModule } from './apps/auth/auth.module';
 
 @Module({
   //imports => list of modules, allowing us to access thier classes and dependecies basically all the  providers of a module
@@ -28,12 +30,14 @@ import { loggerFormat } from './common/utils/winston.logger';
           : new winston.transports.Console(),
       ],
     }),
-    PrismaModule,
+    SessionModule,
+    UserModule,
+    AuthModule,
   ],
   //list of classes that serve as api endpoints
   controllers: [AppController],
   //providers => list of classes and their dependencies
-  providers: [AppService, PrismaService],
+  providers: [AppService],
   // export => list of classes that can be accessed by other modules
   // exports:[]
 })

@@ -12,7 +12,7 @@ import helmet from 'helmet';
 import { urlencoded, json } from 'express';
 import { AppModule } from 'src/app.module';
 
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/apps/prisma/prisma.service';
 import { classValidatorPipeInstance } from 'src/common/class-validation-pipe';
 import { AllExceptionsFilter } from 'src/common/exception/error-handler';
 

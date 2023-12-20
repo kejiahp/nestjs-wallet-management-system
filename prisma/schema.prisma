@@ -2,10 +2,60 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserAccountStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  password             String
+  image_url            String            @db.Text
+  cloudinary_public_id String
+  password_reset_code  String?
+  account_status       UserAccountStatus @default(INACTIVE)
+  email_verified       Boolean
+  email_verified_at    DateTime?
+  deleted_at           DateTime?
+  created_at           DateTime          @default(now())
+  updated_at           DateTime          @updatedAt
+
+  wallet  Wallet?
+  session Session[]
+
+  @@index([email], name: "email_index")
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  is_valid   Boolean  @default(true)
+  userAgent  String   @db.VarChar(400)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Wallet {
+  id             String   @id @default(uuid())
+  user_id        String   @unique
+  user           User     @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  balance        Float    @default(0.0)
+  bank_name      String
+  bank_code      String
+  account_number String
+  account_name   String
+  created_at     DateTime @default(now())
+  deleted_at     DateTime @updatedAt
 }
