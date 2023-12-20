@@ -1,6 +1,6 @@
 import * as morgan from 'morgan';
 
-import { NestFactory, Reflector } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import {
   ClassSerializerInterceptor,
   INestApplication,
@@ -11,6 +11,10 @@ import helmet from 'helmet';
 
 import { urlencoded, json } from 'express';
 import { AppModule } from 'src/app.module';
+
+import { PrismaService } from 'src/prisma/prisma.service';
+import { classValidatorPipeInstance } from 'src/common/class-validation-pipe';
+import { AllExceptionsFilter } from 'src/common/exception/error-handler';
 
 export interface CreateServerOptions {
   port: number;
@@ -44,8 +48,10 @@ export default async (
   app.use(helmet());
   app.enableCors(corsOptions);
 
+  // const baseMorganTokenConfig =
+  //   ':date[iso] :method :url :http-version :status (:response-time ms) :user-agent';
   const baseMorganTokenConfig =
-  ":date[iso] :method :url :http-version :status (:response-time ms)";
+    ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
 
   app.use(morgan(options.production ? baseMorganTokenConfig : 'dev'));
   app.enableVersioning({
@@ -54,7 +60,13 @@ export default async (
     prefix: 'api/v',
   });
 
+  app.useGlobalPipes(classValidatorPipeInstance());
+  const httpAdapterHost = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
+
   app.listen(options.port);
 
+  const prismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
   return app;
 };
