@@ -1,42 +1,33 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import multerOptions from 'src/common/multer/multer.options';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Post('create-user')
+  @UseInterceptors(FileInterceptor('profilePhoto', multerOptions))
+  async create(
+    @Body() createAuthDto: CreateAuthDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: true,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    profilePhoto: Express.Multer.File,
+  ) {
+    return await this.authService.create(createAuthDto, profilePhoto);
   }
 }

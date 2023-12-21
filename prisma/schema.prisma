@@ -25,7 +25,7 @@ model User {
   cloudinary_public_id String
   password_reset_code  String?
   account_status       UserAccountStatus @default(INACTIVE)
-  email_verified       Boolean
+  email_verified       Boolean           @default(false)
   email_verified_at    DateTime?
   deleted_at           DateTime?
   created_at           DateTime          @default(now())

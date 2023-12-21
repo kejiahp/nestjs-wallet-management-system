@@ -18,7 +18,9 @@ import * as redisStore from 'cache-manager-redis-store';
   imports: [
     PrismaModule,
     //Configure environment variables
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     //Winston for logging i also have a none nestjs coupled log in utils
     WinstonModule.forRoot({
       level: 'debug',

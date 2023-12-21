@@ -1,26 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { EncryptionService } from 'src/common/encryption/encryption.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly encryptionService: EncryptionService,
+    private readonly userService: UserService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async create(
+    createAuthDto: CreateAuthDto,
+    profilePhoto: Express.Multer.File,
+  ) {
+    const photoUploadResult =
+      await this.cloudinaryService.uploadImage(profilePhoto);
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const hashPassword = await this.encryptionService.hashPassword(
+      createAuthDto.password,
+    );
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return await this.userService.createUser({
+      email: createAuthDto.email,
+      password: hashPassword,
+      image_url: photoUploadResult.secure_url,
+      cloudinary_public_id: photoUploadResult.public_id,
+    });
   }
 }
