@@ -28,4 +28,30 @@ export class UserService {
     const { password, ...props } = user;
     return props;
   }
+
+  public async verifyUserAccount(email: string) {
+    const userExist = await this.prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    if (!userExist) {
+      return ResponseHandler.error(HttpStatus.NOT_FOUND, 'Account not found');
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        account_status: 'ACTIVE',
+        email_verified: true,
+        email_verified_at: new Date(),
+      },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...props } = updatedUser;
+
+    return props;
+  }
 }

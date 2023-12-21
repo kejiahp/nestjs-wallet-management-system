@@ -37,4 +37,32 @@ export class MailerRepositories {
       html,
     );
   }
+
+  public async sendEmailVerificationSuccessMail(
+    user: Omit<UserModel, 'password'>,
+  ) {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email verification mail</title>
+    </head>
+    <body>
+        <h3 style="color:gray;">Hello ${user.email},</h3>
+
+        <p style="font-size:14px;">Your email has been successfully verified</p>
+    </body>
+    </html>
+    `;
+
+    await this.mailerService.sendEmail(
+      user.email,
+      'Email verification successful',
+      'Your email was successfully verified',
+      html,
+    );
+  }
 }

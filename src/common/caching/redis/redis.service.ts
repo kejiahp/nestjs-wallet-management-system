@@ -17,7 +17,7 @@ export class RedisService {
     value: string,
     ttl = 10,
   ): Promise<void> {
-    await this.cacheManager.set(key, value, ttl);
+    await this.cacheManager.set(key, value, { ttl: ttl });
   }
 
   public async getFromCache(key: string): Promise<string | null> {

@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { CreateAuthDto, EmailVerificationDto } from './dto/create-auth.dto';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { EncryptionService } from 'src/common/encryption/encryption.service';
 import { UserService } from '../user/user.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import ResponseHandler from 'src/common/utils/ResponseHandler';
+import { RedisService } from 'src/common/caching/redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +14,7 @@ export class AuthService {
     @InjectQueue('auth-mailing-queue') private authMailQueue: Queue,
     private readonly cloudinaryService: CloudinaryService,
     private readonly encryptionService: EncryptionService,
+    private readonly redisService: RedisService,
     private readonly userService: UserService,
   ) {}
 
@@ -38,5 +41,49 @@ export class AuthService {
     });
 
     return user;
+  }
+
+  async verifyEmailService(emailVerificationDto: EmailVerificationDto) {
+    const optCode = await this.redisService.getFromCache(
+      `${emailVerificationDto.email}-otp`,
+    );
+
+    console.log(optCode);
+
+    if (!optCode) {
+      return ResponseHandler.error(HttpStatus.NOT_FOUND, 'Invalid OTP code');
+    }
+
+    if (emailVerificationDto.otp !== optCode) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_REQUEST,
+        'OTP codes do not match',
+      );
+    }
+
+    const updatedUser = await this.userService.verifyUserAccount(
+      emailVerificationDto.email,
+    );
+
+    await this.redisService.deleteFromCache(
+      `${emailVerificationDto.email}-otp`,
+    );
+
+    await this.authMailQueue.add('email-verified', {
+      user: updatedUser,
+    });
+
+    if (updatedUser) {
+      return ResponseHandler.response(
+        HttpStatus.OK,
+        true,
+        'Account successfully verified',
+      );
+    }
+
+    return ResponseHandler.error(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to verify account',
+    );
   }
 }

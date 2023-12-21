@@ -10,8 +10,10 @@ import { loggerFormat } from './common/utils/winston.logger';
 import { SessionModule } from './apps/session/session.module';
 import { UserModule } from './apps/user/user.module';
 import { AuthModule } from './apps/auth/auth.module';
-
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 import { BullModule } from '@nestjs/bull';
+import { RedisModule } from './common/caching/redis/redis.module';
 
 @Module({
   //imports => list of modules, allowing us to access thier classes and dependecies basically all the  providers of a module
@@ -34,6 +36,14 @@ import { BullModule } from '@nestjs/bull';
           : new winston.transports.Console(),
       ],
     }),
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore,
+      host: process.env.REDIS_CACHE_HOST,
+      port: process.env.REDIS_CACHE_PORT,
+      ttl: Number(process.env.REDIS_CACHE_TTL),
+      auth_pass: process.env.REDIS_PASSWORD,
+    }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -48,6 +58,7 @@ import { BullModule } from '@nestjs/bull';
     SessionModule,
     UserModule,
     AuthModule,
+    RedisModule,
   ],
   //list of classes that serve as api endpoints
   controllers: [AppController],

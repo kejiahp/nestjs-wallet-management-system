@@ -1,5 +1,5 @@
 export class Utilities {
-  public static secondsToDays(days: number) {
+  public static daysToSeconds(days: number) {
     return days * 24 * 60 * 60;
   }
 

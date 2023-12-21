@@ -8,7 +8,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { CreateAuthDto, EmailVerificationDto } from './dto/create-auth.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import multerOptions from 'src/common/multer/multer.options';
 
@@ -29,5 +29,10 @@ export class AuthController {
     profilePhoto: Express.Multer.File,
   ) {
     return await this.authService.create(createAuthDto, profilePhoto);
+  }
+
+  @Post('email-verification')
+  async verifyEmail(@Body() emailVerificationDto: EmailVerificationDto) {
+    return await this.authService.verifyEmailService(emailVerificationDto);
   }
 }
