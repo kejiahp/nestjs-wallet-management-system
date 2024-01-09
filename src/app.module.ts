@@ -13,7 +13,6 @@ import { AuthModule } from './apps/auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { BullModule } from '@nestjs/bull';
-import { RedisModule } from './common/caching/redis/redis.module';
 
 @Module({
   //imports => list of modules, allowing us to access thier classes and dependecies basically all the  providers of a module
@@ -58,7 +57,6 @@ import { RedisModule } from './common/caching/redis/redis.module';
     SessionModule,
     UserModule,
     AuthModule,
-    RedisModule,
   ],
   //list of classes that serve as api endpoints
   controllers: [AppController],

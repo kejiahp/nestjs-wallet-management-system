@@ -48,8 +48,6 @@ export class AuthService {
       `${emailVerificationDto.email}-otp`,
     );
 
-    console.log(optCode);
-
     if (!optCode) {
       return ResponseHandler.error(HttpStatus.NOT_FOUND, 'Invalid OTP code');
     }

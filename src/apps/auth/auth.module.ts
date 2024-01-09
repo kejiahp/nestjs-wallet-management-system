@@ -9,6 +9,7 @@ import { BullModule } from '@nestjs/bull';
 import { MailerModule } from 'src/common/mailer/mailer.module';
 import { AuthMailingConsumer } from './queues/auth.consumer';
 import { RedisModule } from 'src/common/caching/redis/redis.module';
+import { JwtModule } from 'src/common/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RedisModule } from 'src/common/caching/redis/redis.module';
     BullModule.registerQueue({
       name: 'auth-mailing-queue',
     }),
+    JwtModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthMailingConsumer],
