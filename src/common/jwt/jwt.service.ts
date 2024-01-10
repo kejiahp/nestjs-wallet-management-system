@@ -32,4 +32,16 @@ export class JwtService {
       };
     }
   }
+
+  public signAccessToken(object: { [key: string]: any }) {
+    const accessTokenTTL = this.configService.get<string>('ACCESSTOKENTTL');
+
+    return this.signJwt(object, { expiresIn: accessTokenTTL });
+  }
+
+  public signRefreshToken(object: { [key: string]: any }) {
+    const refreshTokenTTL = this.configService.get<string>('REFRESHTOKENTTL');
+
+    return this.signJwt(object, { expiresIn: refreshTokenTTL });
+  }
 }

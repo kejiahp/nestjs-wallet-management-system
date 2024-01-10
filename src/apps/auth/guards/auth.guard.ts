@@ -33,12 +33,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    try {
-      const decoded = this.jwtService.verifyJwt(token);
-      request['user'] = decoded;
-    } catch (e) {
+    const { decoded, expired, valid } = this.jwtService.verifyJwt(token);
+
+    if (expired || !decoded || !valid) {
       throw new UnauthorizedException();
     }
+
+    request['user'] = decoded;
     return true;
   }
 }

@@ -10,6 +10,7 @@ import { MailerModule } from 'src/common/mailer/mailer.module';
 import { AuthMailingConsumer } from './queues/auth.consumer';
 import { RedisModule } from 'src/common/caching/redis/redis.module';
 import { JwtModule } from 'src/common/jwt/jwt.module';
+import { queueKeys } from 'src/common/constant/queue-keys';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { JwtModule } from 'src/common/jwt/jwt.module';
     MailerModule,
     RedisModule,
     BullModule.registerQueue({
-      name: 'auth-mailing-queue',
+      name: queueKeys.authMailingQueue,
     }),
     JwtModule,
   ],
