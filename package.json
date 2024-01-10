@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.7.1",
     "@types/cache-manager": "^4.0.6",
+    "axios": "^1.6.5",
     "bcrypt": "^5.1.1",
     "bull": "^4.12.0",
     "cache-manager": "^4.0.0",

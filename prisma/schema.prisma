@@ -56,6 +56,9 @@ model Wallet {
   bank_code      String
   account_number String
   account_name   String
+  recipient_code String?
+  address        String
+  country        String
   created_at     DateTime @default(now())
   deleted_at     DateTime @updatedAt
 }

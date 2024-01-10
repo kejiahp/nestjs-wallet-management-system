@@ -22,4 +22,8 @@ export class Utilities {
       },
     );
   }
+
+  public static intToFloat(num: number, decPlaces: number) {
+    return num.toFixed(decPlaces);
+  }
 }
