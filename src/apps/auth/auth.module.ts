@@ -11,6 +11,7 @@ import { AuthMailingConsumer } from './queues/auth.consumer';
 import { RedisModule } from 'src/common/caching/redis/redis.module';
 import { JwtModule } from 'src/common/jwt/jwt.module';
 import { queueKeys } from 'src/common/constant/queue-keys';
+import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { queueKeys } from 'src/common/constant/queue-keys';
     JwtModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthMailingConsumer],
+  providers: [AuthService, AuthMailingConsumer, AuthGuard],
+  exports: [AuthGuard],
 })
 export class AuthModule {}

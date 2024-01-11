@@ -50,26 +50,6 @@ export class PaymentService {
     }
   }
 
-  async getAddress(country_code: string): Promise<any> {
-    const options = {
-      headers: {
-        Authorization: `Bearer ${this.secretKey}`,
-      },
-    };
-
-    try {
-      const response = await axios.get(
-        `${this.apiBaseUrl}/address_verification/states?country=${country_code}`,
-        options,
-      );
-      return response.data;
-    } catch (error) {
-      // Handle error here
-      console.error(error);
-      throw error;
-    }
-  }
-
   async resolveBankAccount(
     accountNumber: string,
     bankCode: string,
