@@ -75,9 +75,18 @@ export class PaymentService {
   }
 
   private convert_naira_to_kobo(amount: number) {
+    //inital amount: 200.54622145675
+    //convert the amount into kobo e.g. 20054.622145675
     const kobo = amount * 100;
+
+    //get the first two decimal places e.g. 20054.62
     const float = Number(Utilities.intToFloat(kobo, 2));
+
+    return float;
+    //round it up to an whole number e.g. 20055
     const rounded = Math.round(float);
+
+    //paystack will convert the whole number back into a naira e.g. 200.55
     return rounded;
   }
 

@@ -48,6 +48,21 @@ export class WalletService {
   ) {
     const callback = callback_url ? callback_url : null;
 
+    const initPayment = await this.paymentService.initializePayment(
+      reason,
+      amount,
+      email,
+      transaction_ref,
+      callback,
+    );
+
+    if (initPayment.status === false) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_GATEWAY,
+        'Failed to initialize payment' + ' # ' + initPayment.message,
+      );
+    }
+
     await this.prisma.transaction.create({
       data: {
         user_id: user_id,
@@ -57,13 +72,7 @@ export class WalletService {
       },
     });
 
-    return await this.paymentService.initializePayment(
-      reason,
-      amount,
-      email,
-      transaction_ref,
-      callback,
-    );
+    return initPayment;
   }
 
   public async addRecipientCode(user_id: string) {

@@ -27,4 +27,9 @@ export class WalletController {
       body.bank_code,
     );
   }
+
+  @Post('deposit-confirmation-webhook')
+  async depositConfirmationWebHook(@Body() body: any) {
+    return body;
+  }
 }
