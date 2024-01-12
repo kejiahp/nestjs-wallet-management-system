@@ -26,4 +26,23 @@ export class Utilities {
   public static intToFloat(num: number, decPlaces: number) {
     return num.toFixed(decPlaces);
   }
+
+  public static generateRandomAlphanumeric(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters.charAt(randomIndex);
+    }
+
+    return result;
+  }
+
+  public static generateReference(): string {
+    const randomPart = this.generateRandomAlphanumeric(15);
+    const formattedCode = `REF_${randomPart}`;
+
+    return formattedCode;
+  }
 }

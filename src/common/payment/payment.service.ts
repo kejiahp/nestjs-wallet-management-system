@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import ResponseHandler from '../utils/ResponseHandler';
 import { Utilities } from '../utils/utilities';
+import { CreateRecipientType } from './payment.types';
 
 @Injectable()
 export class PaymentService {
@@ -73,10 +74,11 @@ export class PaymentService {
     }
   }
 
-  private async convert_naira_to_kobo(amount: number) {
+  private convert_naira_to_kobo(amount: number) {
     const kobo = amount * 100;
-    const float = Utilities.intToFloat(kobo, 2);
-    return float;
+    const float = Number(Utilities.intToFloat(kobo, 2));
+    const rounded = Math.round(float);
+    return rounded;
   }
 
   async initializePayment(
@@ -103,9 +105,12 @@ export class PaymentService {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     };
+
+    const payment_fees = this.convert_naira_to_kobo(amount);
+
     const payload = {
       email: email,
-      amount: this.convert_naira_to_kobo(amount),
+      amount: payment_fees,
       callback_url: callback_url,
       reference: transaction_ref,
       metadata: {
@@ -125,12 +130,12 @@ export class PaymentService {
   }
 
   async createTransferRecipient(
-    type: string = 'nuban',
     name: string,
     accountNumber: string,
     bankCode: string,
+    type: string = 'nuban',
     currency: string = 'NGN',
-  ): Promise<any> {
+  ): Promise<CreateRecipientType> {
     const payload = {
       type,
       name,

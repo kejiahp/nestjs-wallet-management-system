@@ -17,6 +17,19 @@ enum UserAccountStatus {
   DELETED
 }
 
+enum TransactionType {
+  WITHDRAWAL
+  DEPOSIT
+  ESCROW
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+  FAILED
+}
+
 model User {
   id                   String            @id @default(uuid())
   email                String            @unique
@@ -31,8 +44,9 @@ model User {
   created_at           DateTime          @default(now())
   updated_at           DateTime          @updatedAt
 
-  wallet  Wallet?
-  session Session[]
+  wallet      Wallet?
+  session     Session[]
+  Transaction Transaction[]
 
   @@index([email], name: "email_index")
 }
@@ -61,4 +75,16 @@ model Wallet {
   country        String
   created_at     DateTime @default(now())
   deleted_at     DateTime @updatedAt
+}
+
+model Transaction {
+  id                 String            @id @default(uuid())
+  user_id            String
+  user               User              @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  transaction_ref    String            @unique
+  transaction_amount Float
+  transaction_type   TransactionType
+  transaction_status TransactionStatus @default(PENDING)
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
 }

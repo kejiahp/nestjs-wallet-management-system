@@ -1,4 +1,18 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+  Length,
+} from 'class-validator';
+
+export enum TransactionType {
+  WITHDRAWAL = 'WITHDRAWAL',
+  DEPOSIT = 'DEPOSIT',
+  ESCROW = 'ESCROW',
+}
 
 export class ResolveAccountDetailsDto {
   @IsNotEmpty()
@@ -36,4 +50,16 @@ export class CreateWalletDto {
   @IsNotEmpty()
   @IsString()
   country: string;
+}
+
+export class DepositMoneyDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  transaction_amount: number;
+
+  @IsNotEmpty()
+  @Transform(({ value }) => ('' + value).toUpperCase())
+  @IsEnum(TransactionType)
+  transaction_type: TransactionType;
 }
