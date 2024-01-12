@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PaymentService } from 'src/common/payment/payment.service';
 import { ResolveAccountDetailsDto } from './dto/wallet.dto';
@@ -29,7 +29,11 @@ export class WalletController {
   }
 
   @Post('deposit-confirmation-webhook')
-  async depositConfirmationWebHook(@Body() body: any) {
-    return body;
+  @HttpCode(200)
+  async depositConfirmationWebHook(
+    @Body() body: any,
+    @Headers('x-paystack-signature') X_PAYSTACK_SIGNATURE: string,
+  ) {
+    return this.walletService.webhookService(body, X_PAYSTACK_SIGNATURE);
   }
 }

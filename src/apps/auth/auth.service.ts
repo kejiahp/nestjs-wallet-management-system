@@ -18,13 +18,13 @@ import ResponseHandler from 'src/common/utils/ResponseHandler';
 import { RedisService } from 'src/common/caching/redis/redis.service';
 import { SessionService } from '../session/session.service';
 import { JwtService } from 'src/common/jwt/jwt.service';
-import { namedJobQueueKeys } from 'src/common/constant/queue-keys';
+import { namedJobQueueKeys, queueKeys } from 'src/common/constant/queue-keys';
 import { Utilities } from 'src/common/utils/utilities';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectQueue('auth-mailing-queue') private authMailQueue: Queue,
+    @InjectQueue(queueKeys.authMailingQueue) private authMailQueue: Queue,
     private readonly cloudinaryService: CloudinaryService,
     private readonly encryptionService: EncryptionService,
     private readonly redisService: RedisService,

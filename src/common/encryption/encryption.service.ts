@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class EncryptionService {
@@ -14,5 +15,12 @@ export class EncryptionService {
 
   async comparePassword(password: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(password, hash);
+  }
+
+  hashPaystackWebHookPayload(payload: any, secret: string) {
+    return crypto
+      .createHmac('sha512', secret)
+      .update(JSON.stringify(payload))
+      .digest('hex');
   }
 }
