@@ -2,8 +2,9 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/apps/auth/guards/auth.guard';
 import { CreateWalletDto, DepositMoneyDto } from '../dto/wallet.dto';
 import { WalletService } from '../wallet.service';
-import { RequestAuthUserType } from 'src/apps/auth/types';
+import { AuthUserType, RequestAuthUserType } from 'src/apps/auth/types';
 import { Utilities } from 'src/common/utils/utilities';
+import { CurrentUser } from 'src/common/decorator/current-user.decorator';
 
 @Controller('protected-wallet')
 @UseGuards(AuthGuard)
@@ -28,10 +29,10 @@ export class ProtectedWalletController {
   @Post('deposit-money')
   async depositMoneyIntoAccount(
     @Body() body: DepositMoneyDto,
-    @Req() req: RequestAuthUserType,
+    @CurrentUser() currentUser: AuthUserType,
   ) {
-    const user_id = req.user.id;
-    const user_email = req.user.email;
+    const user_id = currentUser.id;
+    const user_email = currentUser.email;
     const transaction_ref = Utilities.generateReference();
 
     return this.walletService.initiatePayment(
