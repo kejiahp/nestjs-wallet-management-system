@@ -1,5 +1,16 @@
 version: '3.8'
 services:
+  server:
+    build:
+      context: .
+    depends_on:
+      - postgres
+      - cache
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env
+
   postgres:
     image: postgres:10.3
     restart: always

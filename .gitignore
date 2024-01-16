@@ -4,6 +4,7 @@
 
 #environment variables
 *.env*
+*.pem
 
 # Logs
 logs

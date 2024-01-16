@@ -1,0 +1,43 @@
+name: Build, Publish and Run Container
+
+# Controls when the workflow will run
+on:
+  push:
+    branches:
+      - master # Will run on push to the "master" branch
+  # pull_request:
+  #   branches:
+  #     - master
+
+env:
+  IMAGE_TAG: ktm-core
+  ENVIRONMENT: test
+
+jobs:
+  tests:
+    name: Build and Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create .env file from Secret
+        id: import-env
+        run: |
+          echo "${{ secrets.TEST_ENV_FILE }}" >> .env
+      - uses: cardinalby/export-env-action@v2
+        with:
+          mask: false
+          envFile: '.env'
+
+      - name: Build the docker image
+        run: docker build -t $IMAGE_TAG:$ENVIRONMENT --target=builder .
+
+      - name: Run Prettier
+        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run format'
+
+      - name: Run ESLint
+        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run lint'
+
+      - name: Run Unit tests
+        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run test'
