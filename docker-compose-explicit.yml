@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  kejiah-wallet-management-server:
+    image: kejiah/kejiah-wallet-server:latest
+    depends_on:
+      - postgres
+      - cache
+    ports:
+      - '${PORT}:5000'
+    environment:
+      - NODE_ENV=production
+
+  postgres:
+    image: postgres:10.3
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgresdbdata:/var/lib/postgresql/data
+    ports:
+      - '${DB_PORT}:5432'
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '${REDIS_CACHE_PORT}:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes: 
+      - redis-cache:/data
+volumes:
+  postgresdbdata:
+  redis-cache:

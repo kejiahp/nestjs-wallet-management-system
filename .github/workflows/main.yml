@@ -68,7 +68,8 @@ jobs:
   #   runs-on: [self-hosted]
   #   steps:
   #     - name: Pull image from docker hub
-  #       run: docker pull $IMAGE_NAME:$TAG_NAME
+
+  #       run: docker pull $REPO_NAME/$IMAGE_NAME:$TAG_NAME
 
   #     - name: Delete old container
   #       run: docker rm -f $CONTAINER_NAME
