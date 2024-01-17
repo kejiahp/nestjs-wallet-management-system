@@ -68,5 +68,8 @@ jobs:
   #     - name: Delete old container
   #       run: docker rm -f $CONTAINER_NAME
 
+  # - name: Run Prettier
+  #   run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npx prisma migrate deploy'
+
   #     - name: Run docker container
   #       run: docker run -p 5000:5000 $IMAGE_TAG:$ENVIRONMENT -d --name $CONTAINER_NAME

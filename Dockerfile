@@ -70,6 +70,8 @@ COPY --chown=node:node --from=build /home/wallet-management/ecosystem.config.js 
 COPY --chown=node:node --from=build /home/wallet-management/prisma ./prisma
 COPY --chown=node:node --from=build /home/wallet-management/entrypoint.sh ./
 
+#this isn't necessary here
+# ENTRYPOINT ["./entrypoint.sh"]
+
 # Start the server using the production build
-ENTRYPOINT ["./entrypoint.sh"]
 CMD [ "npm", "run", "start:pm2" ]
