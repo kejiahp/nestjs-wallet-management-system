@@ -25,9 +25,8 @@ jobs:
       - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-    steps:
       - name: Create .env file
-      # Creates an '.env' file with environment variables
+        # Creates an '.env' file with environment variables
         run: |
           touch .env
           echo PORT=${{ secrets.PORT }} >> .env
@@ -63,7 +62,7 @@ jobs:
         run: docker push $REPO_NAME/$IMAGE_NAME:$TAG_NAME
 
   # run:
-  #   needs: build
+  #   needs: build-and-publish
   #   runs-on: [self-hosted]
   #   steps:
   #     - name: Pull image from docker hub
