@@ -7,8 +7,8 @@ on:
 
 env:
   REPO_NAME: kejiah
-  IMAGE_TAG: kejiah-wallet-server
-  ENVIRONMENT: latest
+  IMAGE_NAME: kejiah-wallet-server
+  TAG_NAME: latest
   CONTAINER_NAME: kejiah-wallet-server-container
 
 jobs:
@@ -58,23 +58,23 @@ jobs:
           envFile: '.env'
 
       - name: Build docker image
-        run: docker build -t $IMAGE_TAG .
+        run: docker build -t $REPO_NAME/$IMAGE_NAME .
 
       - name: Publish image to docker hub
-        run: docker push $REPO_NAME/$IMAGE_TAG:$ENVIRONMENT
+        run: docker push $REPO_NAME/$IMAGE_NAME:$TAG_NAME
 
   # run:
   #   needs: build
   #   runs-on: [self-hosted]
   #   steps:
   #     - name: Pull image from docker hub
-  #       run: docker pull $IMAGE_TAG:$ENVIRONMENT
+  #       run: docker pull $IMAGE_NAME:$TAG_NAME
 
   #     - name: Delete old container
   #       run: docker rm -f $CONTAINER_NAME
 
   # - name: Run Prettier
-  #   run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npx prisma migrate deploy'
+  #   run: docker run $IMAGE_NAME:$TAG_NAME sh -c 'npx prisma migrate deploy'
 
   #     - name: Run docker container
-  #       run: docker run -p 5000:5000 $IMAGE_TAG:$ENVIRONMENT -d --name $CONTAINER_NAME
+  #       run: docker run -p 5000:5000 $IMAGE_NAME:$TAG_NAME -d --name $CONTAINER_NAME
