@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  kejiah-wallet-management-server:
+  kejiah-wallet-server:
     image: kejiah/kejiah-wallet-server:latest
     depends_on:
       - postgres
