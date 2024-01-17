@@ -6,9 +6,10 @@ on:
       - master
 
 env:
-  IMAGE_TAG: kejiah-wallet-management-server
+  REPO_NAME: kejiah
+  IMAGE_TAG: kejiah-wallet-server
   ENVIRONMENT: latest
-  CONTAINER_NAME: kejiah-wallet-management-server-container
+  CONTAINER_NAME: kejiah-wallet-server-container
 
 jobs:
   build-and-publish:
@@ -60,7 +61,7 @@ jobs:
         run: docker build -t $IMAGE_TAG .
 
       - name: Publish image to docker hub
-        run: docker push $IMAGE_TAG:$ENVIRONMENT
+        run: docker push $REPO_NAME/$IMAGE_TAG:$ENVIRONMENT
 
   # run:
   #   needs: build
