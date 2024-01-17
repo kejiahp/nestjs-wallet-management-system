@@ -7,7 +7,9 @@ export class JwtService {
   constructor(private configService: ConfigService) {}
 
   public signJwt(object: object, options?: jwt.SignOptions) {
-    const private_key = this.configService.get<string>('JWT_PRIVATE_KEY');
+    let private_key = this.configService.get<string>('JWT_PRIVATE_KEY');
+    private_key = Buffer.from(private_key, 'base64').toString('ascii');
+
     return jwt.sign(object, private_key, {
       ...(options && options),
       algorithm: 'RS256',
@@ -15,7 +17,9 @@ export class JwtService {
   }
 
   public verifyJwt(token: string) {
-    const public_key = this.configService.get<string>('JWT_PUBLIC_KEY');
+    let public_key = this.configService.get<string>('JWT_PUBLIC_KEY');
+    public_key = Buffer.from(public_key, 'base64').toString('ascii');
+
     try {
       const decoded = jwt.verify(token, public_key);
 

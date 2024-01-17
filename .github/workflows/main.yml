@@ -1,43 +1,72 @@
 name: Build, Publish and Run Container
 
-# Controls when the workflow will run
 on:
   push:
     branches:
-      - master # Will run on push to the "master" branch
-  # pull_request:
-  #   branches:
-  #     - master
+      - master
 
 env:
-  IMAGE_TAG: ktm-core
-  ENVIRONMENT: test
+  IMAGE_TAG: kejiah-wallet-management-server
+  ENVIRONMENT: latest
+  CONTAINER_NAME: kejiah-wallet-management-server-container
 
 jobs:
-  tests:
-    name: Build and Run tests
-    runs-on: ubuntu-latest
+  build-and-publish:
+    runs-on: [ubuntu-latest]
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v3
+
+      - name: Login to docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Create .env file from Secret
         id: import-env
         run: |
-          echo "${{ secrets.TEST_ENV_FILE }}" >> .env
+          echo "${{ secrets.PORT }}" >> .env
+          echo "${{ secrets.WHITE_LISTED_DOMAINS }}" >> .env
+          echo "${{ secrets.NODE_ENV }}" >> .env
+          echo "${{ secrets.DB_HOST }}" >> .env
+          echo "${{ secrets.DB_PORT }}" >> .env
+          echo "${{ secrets.DB_SCHEMA }}" >> .env
+          echo "${{ secrets.POSTGRES_USER }}" >> .env
+          echo "${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "${{ secrets.POSTGRES_DB }}" >> .env
+          echo "${{ secrets.DATABASE_URL }}" >> .env
+          echo "${{ secrets.REDIS_CACHE_HOST }}" >> .env
+          echo "${{ secrets.REDIS_CACHE_PORT }}" >> .env
+          echo "${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+          echo "${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+          echo "${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+          echo "${{ secrets.SALTWORKFACTOR }}" >> .env
+          echo "${{ secrets.ACCESSTOKENTTL }}" >> .env
+          echo "${{ secrets.REFRESHTOKENTTL }}" >> .env
+          echo "${{ secrets.MAILING_EMAIL }}" >> .env
+          echo "${{ secrets.MAILING_PASSWORD }}" >> .env
+          echo "${{ secrets.JWT_PUBLIC_KEY }}" >> .env
+          echo "${{ secrets.JWT_PRIVATE_KEY }}" >> .env
+          echo "${{ secrets.PAYSTACK_SECRET_KEY }}" >> .env
       - uses: cardinalby/export-env-action@v2
         with:
           mask: false
           envFile: '.env'
 
-      - name: Build the docker image
-        run: docker build -t $IMAGE_TAG:$ENVIRONMENT --target=builder .
+      - name: Build docker image
+        run: docker build -t $IMAGE_TAG .
 
-      - name: Run Prettier
-        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run format'
+      - name: Publish image to docker hub
+        run: docker push $IMAGE_TAG:$ENVIRONMENT
 
-      - name: Run ESLint
-        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run lint'
+  # run:
+  #   needs: build
+  #   runs-on: [self-hosted]
+  #   steps:
+  #     - name: Pull image from docker hub
+  #       run: docker pull $IMAGE_TAG:$ENVIRONMENT
 
-      - name: Run Unit tests
-        run: docker run $IMAGE_TAG:$ENVIRONMENT sh -c 'npm run test'
+  #     - name: Delete old container
+  #       run: docker rm -f $CONTAINER_NAME
+
+  #     - name: Run docker container
+  #       run: docker run -p 5000:5000 $IMAGE_TAG:$ENVIRONMENT -d --name $CONTAINER_NAME

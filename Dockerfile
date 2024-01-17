@@ -4,10 +4,10 @@
 # BUILD FOR LOCAL DEVELOPMENT
 ###################
 
-FROM node:18-alpine As development
+FROM node:20.10.0-alpine As development
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /home/wallet-management
 
 # Copy application dependency manifests to the container image.
 # A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
@@ -27,16 +27,20 @@ USER node
 # BUILD FOR PRODUCTION
 ###################
 
-FROM node:18-alpine As build
+FROM node:20.10.0-alpine As build
 
-WORKDIR /usr/src/app
+WORKDIR /home/wallet-management
 
 COPY --chown=node:node package*.json ./
 
 # In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=development /home/wallet-management/node_modules ./node_modules
 
 COPY --chown=node:node . .
+
+# Init prisma client
+RUN npx prisma generate
+
 
 # Run the build command which creates the production bundle
 RUN npm run build
@@ -53,12 +57,19 @@ USER node
 # PRODUCTION
 ###################
 
-FROM node:18-alpine As production
+FROM node:20.10.0-alpine As production
+
+WORKDIR /home/wallet-management
 
 # Copy the bundled code from the build stage to the production image
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-# COPY --chown=node:node --from=build  /usr/src/app/.env ./
+COPY --chown=node:node --from=build /home/wallet-management/node_modules ./node_modules
+COPY --chown=node:node --from=build /home/wallet-management/dist ./dist
+COPY --chown=node:node --from=build /home/wallet-management/.env ./
+COPY --chown=node:node --from=build /home/wallet-management/package*.json ./
+COPY --chown=node:node --from=build /home/wallet-management/ecosystem.config.js ./
+COPY --chown=node:node --from=build /home/wallet-management/prisma ./prisma
+COPY --chown=node:node --from=build /home/wallet-management/entrypoint.sh ./
 
 # Start the server using the production build
+ENTRYPOINT ["./entrypoint.sh"]
 CMD [ "npm", "run", "start:pm2" ]
