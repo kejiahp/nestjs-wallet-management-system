@@ -4,6 +4,8 @@ services:
   kejiah-wallet-server:
     image: kejiah/kejiah-wallet-server:latest
     container_name: kejiah-wallet-server-container
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     depends_on:
