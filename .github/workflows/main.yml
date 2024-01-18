@@ -75,6 +75,9 @@ jobs:
       - name: Drop all conatainers
         run: docker compose -p ${DOCKER_PROJECT_NAME} down
 
+      - name: Login to docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
       - name: pull latest service image
         run: docker compose pull ${IMAGE_NAME}
 
