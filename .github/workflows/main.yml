@@ -9,6 +9,7 @@ env:
   REPO_NAME: kejiah
   IMAGE_NAME: kejiah-wallet-server
   TAG_NAME: latest
+  DOCKER_PROJECT_NAME: wallet-backend
   CONTAINER_NAME: kejiah-wallet-server-container
 
 jobs:
@@ -66,16 +67,25 @@ jobs:
         shell: bash
 
       - name: Copy docker-compose.prod to runner
-        run: curl https://raw.githubusercontent.com/kejiahp/wallet-management-system/blob/master/docker-compose.prod.yml --output docker-compose.prod.yml
+        run: curl https://raw.githubusercontent.com/kejiahp/wallet-management-system/master/docker-compose.prod.yml --output docker-compose.prod.yml
 
-  #     - name: Pull image from docker hub
-  #       run: docker pull $REPO_NAME/$IMAGE_NAME:$TAG_NAME
+      - name: Stop all conatainers
+        run: docker compose -p ${DOCKER_PROJECT_NAME} stop
 
-  #     - name: Delete old container
-  #       run: docker rm -f $CONTAINER_NAME
+      - name: Drop all conatainers
+        run: docker compose -p ${DOCKER_PROJECT_NAME} down
 
-  # - name: Run Prettier
-  #   run: docker run $IMAGE_NAME:$TAG_NAME sh -c 'npx prisma migrate deploy'
+      - name: pull latest service image
+        run: docker compose pull ${IMAGE_NAME}
 
-  #     - name: Run docker container
-  #       run: docker run -p 5000:5000 $IMAGE_NAME:$TAG_NAME -d --name $CONTAINER_NAME
+      - name: start all containers
+        run: docker compose up -d
+
+      - name: enter application container shell
+        run: docker exec -it ${CONTAINER_NAME} sh
+
+      - name: Run prisma migrations
+        run: npx prisma migrate deploy
+
+      - name: Exit the container shell
+        run: exit

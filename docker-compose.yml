@@ -1,8 +1,11 @@
 version: '3.8'
+name: wallet-backend
 services:
   kejiah-wallet-management-server:
     build:
       context: .
+    env_file:
+      - .env
     depends_on:
       - postgres
       - cache
@@ -13,6 +16,8 @@ services:
 
   postgres:
     image: postgres:10.3
+    env_file:
+      - .env
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -24,6 +29,8 @@ services:
 
   cache:
     image: redis:6.2-alpine
+    env_file:
+      - .env
     restart: always
     ports:
       - '${REDIS_CACHE_PORT}:6379'

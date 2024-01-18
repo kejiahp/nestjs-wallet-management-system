@@ -1,7 +1,11 @@
 version: '3.8'
+name: wallet-backend
 services:
   kejiah-wallet-server:
     image: kejiah/kejiah-wallet-server:latest
+    container_name: kejiah-wallet-server-container
+    env_file:
+      - .env
     depends_on:
       - postgres
       - cache
@@ -12,7 +16,10 @@ services:
 
   postgres:
     image: postgres:10.3
+    container_name: postgres-container
     restart: always
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -23,7 +30,10 @@ services:
 
   cache:
     image: redis:6.2-alpine
+    container_name: redis-container
     restart: always
+    env_file:
+      - .env
     ports:
       - '${REDIS_CACHE_PORT}:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
