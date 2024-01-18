@@ -64,10 +64,10 @@ WORKDIR /home/wallet-management
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /home/wallet-management/node_modules ./node_modules
 COPY --chown=node:node --from=build /home/wallet-management/dist ./dist
-COPY --chown=node:node --from=build /home/wallet-management/.env ./
 COPY --chown=node:node --from=build /home/wallet-management/package*.json ./
 COPY --chown=node:node --from=build /home/wallet-management/ecosystem.config.js ./
 COPY --chown=node:node --from=build /home/wallet-management/prisma ./prisma
+# COPY --chown=node:node --from=build /home/wallet-management/.env ./
 
 # COPY --chown=node:node --from=build /home/wallet-management/entrypoint.sh ./
 #this isn't necessary here, just left it here for reference

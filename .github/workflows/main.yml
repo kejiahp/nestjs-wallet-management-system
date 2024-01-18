@@ -25,8 +25,21 @@ jobs:
       - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Build docker image
+        run: docker build -t $REPO_NAME/$IMAGE_NAME .
+
+      - name: Publish image to docker hub
+        run: docker push $REPO_NAME/$IMAGE_NAME:$TAG_NAME
+
+  run-and-start:
+    needs: build-and-publish
+    runs-on: [self-hosted]
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
       - name: Create .env file
-        # Creates an '.env' file with environment variables
         run: |
           touch .env
           echo PORT=${{ secrets.PORT }} >> .env
@@ -38,9 +51,7 @@ jobs:
           echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
-
           echo DATABASE_URL="postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.DB_HOST }}:${{ secrets.DB_PORT }}/${{ secrets.POSTGRES_DB }}?schema=${{ secrets.DB_SCHEMA }}&sslmode=prefer" >> .env
-
           echo REDIS_CACHE_HOST=${{ secrets.REDIS_CACHE_HOST }} >> .env
           echo REDIS_CACHE_PORT=${{ secrets.REDIS_CACHE_PORT }} >> .env
           echo REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} >> .env
@@ -57,18 +68,10 @@ jobs:
           echo PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }} >> .env
         shell: bash
 
-      - name: Build docker image
-        run: docker build -t $REPO_NAME/$IMAGE_NAME .
+      - name: Copy docker-compose.prod to runner
+        run: curl https://raw.githubusercontent.com/kejiahp/wallet-management-system/blob/master/docker-compose.prod.yml --output docker-compose.prod.yml
 
-      - name: Publish image to docker hub
-        run: docker push $REPO_NAME/$IMAGE_NAME:$TAG_NAME
-
-  # run:
-  #   needs: build-and-publish
-  #   runs-on: [self-hosted]
-  #   steps:
   #     - name: Pull image from docker hub
-
   #       run: docker pull $REPO_NAME/$IMAGE_NAME:$TAG_NAME
 
   #     - name: Delete old container
