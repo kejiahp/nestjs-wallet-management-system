@@ -75,7 +75,7 @@ jobs:
       - name: Drop all conatainers
         run: docker compose -p ${DOCKER_PROJECT_NAME} down
 
-      - name: Login to docker hub
+      - name: Login to docker hub (especially if your image is private)
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: pull latest service image
@@ -84,15 +84,5 @@ jobs:
       - name: start all containers
         run: docker compose up -d
 
-      - name: run prisma migrations
+      - name: run prisma migrations (did this to avoid TTY errors)
         run: echo "npx prisma migrate deploy" | docker exec -i kejiah-wallet-server-container sh
-      # - name: enter application container shell
-      #   run: docker exec -it ${CONTAINER_NAME} sh
-
-      # - name: Run prisma migrations
-      #   run: npx prisma migrate deploy
-
-      # - name: Exit the container shell
-      #   run: exit
-
-      # echo "npx prisma migrate deploy" | docker exec -i kejiah-wallet-server-container sh
