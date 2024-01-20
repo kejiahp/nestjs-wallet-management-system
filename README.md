@@ -1,1 +1,1 @@
-## In heaven and earth i alone am honored 🤞
+## On heaven and earth, I alone am honored 🤞
