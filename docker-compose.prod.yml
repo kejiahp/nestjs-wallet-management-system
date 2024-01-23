@@ -5,7 +5,7 @@ services:
     image: kejiah/kejiah-wallet-server:latest
     container_name: kejiah-wallet-server-container
     extra_hosts:
-      - "host.docker.internal:${DOCKER_LINUX_IP}"
+      - "host.docker.internal:172.17.0.1"
       #this didn't work for some reason
       # - "host.docker.internal:host-gateway"
     env_file:
