@@ -5,7 +5,9 @@ services:
     image: kejiah/kejiah-wallet-server:latest
     container_name: kejiah-wallet-server-container
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:${DOCKER_LINUX_IP}"
+      #this didn't work for some reason
+      # - "host.docker.internal:host-gateway"
     env_file:
       - .env
     depends_on:
@@ -22,8 +24,6 @@ services:
     restart: always
     env_file:
       - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -36,8 +36,6 @@ services:
     image: redis:6.2-alpine
     container_name: redis-container
     restart: always
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     env_file:
       - .env
     ports:
