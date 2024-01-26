@@ -60,7 +60,7 @@ export class AuthService {
 
   async verifyEmailService(emailVerificationDto: EmailVerificationDto) {
     const optCode = await this.redisService.getFromCache(
-      `${emailVerificationDto.email}-otp`,
+      `${emailVerificationDto.email}-${namedJobQueueKeys.sendOtp}`,
     );
 
     if (!optCode) {
