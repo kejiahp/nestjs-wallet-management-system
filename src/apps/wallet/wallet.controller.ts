@@ -1,7 +1,19 @@
-import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { PaymentService } from 'src/common/payment/payment.service';
 import { ResolveAccountDetailsDto } from './dto/wallet.dto';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { Utilities } from 'src/common/utils/utilities';
+
+const otpTTL = Utilities.daysToSeconds(1);
 
 @Controller('wallet')
 export class WalletController {
@@ -10,11 +22,15 @@ export class WalletController {
     private readonly paymentService: PaymentService,
   ) {}
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(otpTTL)
   @Get('get-country')
   async getCountry() {
     return await this.paymentService.getCountry();
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(otpTTL)
   @Get('get-all-banks')
   async getBankAvailable() {
     return await this.paymentService.getBankData('nigeria');
@@ -28,7 +44,7 @@ export class WalletController {
     );
   }
 
-  @Post('deposit-confirmation-webhook')
+  @Post('paystack-webhook')
   @HttpCode(200)
   async depositConfirmationWebHook(
     @Body() body: any,

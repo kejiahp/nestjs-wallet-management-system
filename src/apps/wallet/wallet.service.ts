@@ -138,8 +138,10 @@ export class WalletService {
       body,
       secret,
     );
+    console.log('HASH', X_PAYSTACK_SIGNATURE);
+    console.log('BEFORE HASH VALIDATION', body);
     if (hash !== X_PAYSTACK_SIGNATURE) {
-      return 'okay';
+      return {};
     }
 
     const event: WebHookEventType = body.event;
@@ -155,11 +157,13 @@ export class WalletService {
         amount,
       };
 
+      console.log('BEFORE QUEUE', body);
+
       await this.walletQueue.add(namedJobQueueKeys.chargeSuccess, {
         payload,
       });
 
-      return 'okay';
+      return {};
     }
   }
 }

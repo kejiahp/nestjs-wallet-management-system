@@ -26,7 +26,7 @@ export class DepositConsumer {
       `initializing ${namedJobQueueKeys.chargeSuccess} queue for transaction ${job.data.payload.transaction_ref}`,
     );
 
-    console.log('PAYLOAD', job.data.payload);
+    console.log('QUEUE PAYLOAD', job.data.payload);
 
     // const transaction = await this.prisma.transaction.findUnique({
     //   where: {
