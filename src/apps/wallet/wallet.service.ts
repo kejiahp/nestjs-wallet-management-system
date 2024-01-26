@@ -9,6 +9,7 @@ import { WebHookEventType } from 'src/common/payment/payment.types';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { namedJobQueueKeys, queueKeys } from 'src/common/constant/queue-keys';
+import { Payload_Type } from './wallet.types';
 
 @Injectable()
 export class WalletService {
@@ -138,26 +139,24 @@ export class WalletService {
       body,
       secret,
     );
-    console.log('HASH', X_PAYSTACK_SIGNATURE);
-    console.log('BEFORE HASH VALIDATION', body);
+
     if (hash !== X_PAYSTACK_SIGNATURE) {
       return {};
     }
 
     const event: WebHookEventType = body.event;
-    const forWhat: string = body.data.metadata.forWhat;
+    const forWhat: Payload_Type['forWhat'] = body.data.metadata.forWhat;
     const transaction_ref: string = body.data.reference;
     const amount: number = body.data.amount;
+    const email: string = body.data.customer.email;
 
     if (event === 'charge.success') {
-      const payload = {
-        body,
+      const payload: Payload_Type = {
         forWhat,
         transaction_ref,
         amount,
+        email,
       };
-
-      console.log('BEFORE QUEUE', body);
 
       await this.walletQueue.add(namedJobQueueKeys.chargeSuccess, {
         payload,

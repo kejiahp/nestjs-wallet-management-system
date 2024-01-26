@@ -5,6 +5,7 @@
 #environment variables
 *.env*
 *.pem
+*.notes.txt
 
 # Logs
 logs

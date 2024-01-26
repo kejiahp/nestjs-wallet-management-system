@@ -45,4 +45,8 @@ export class Utilities {
 
     return formattedCode;
   }
+
+  public static koboToNaira(amount: number): number {
+    return amount / 100;
+  }
 }

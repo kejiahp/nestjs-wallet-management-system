@@ -94,4 +94,62 @@ export class MailerRepositories {
       html,
     );
   }
+
+  public async sendTransactionFailedMail(
+    email: string,
+    transactionType: string,
+    reason: string,
+  ) {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Transaction failed</title>
+    </head>
+    <body>
+        <h3 style="color:gray;">Hello ${email}, below is the reason for your transaction being marked as failed.</h3>
+        <p style="margin: 20px 0px;">${reason}</p>
+    </body>
+    </html>
+    `;
+
+    await this.mailerService.sendEmail(
+      email,
+      `${transactionType} Transaction Failed`,
+      'Your transaction did not go through',
+      html,
+    );
+  }
+
+  public async sendTransactionSuccessMail(
+    email: string,
+    transactionType: string,
+    balance: string,
+  ) {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Transaction Successful</title>
+    </head>
+    <body>
+        <h3 style="color:gray;">Hello ${email}, your transaction was successful</h3>
+        <p style="margin: 20px 0px;">Your new account balance: "${balance}"</p>
+    </body>
+    </html>
+    `;
+
+    await this.mailerService.sendEmail(
+      email,
+      `${transactionType} Transaction Successful`,
+      'Transaction successfully completed',
+      html,
+    );
+  }
 }

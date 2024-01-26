@@ -9,6 +9,7 @@ import { JwtModule } from 'src/common/jwt/jwt.module';
 import { EncryptionModule } from 'src/common/encryption/encryption.module';
 import { BullModule } from '@nestjs/bull';
 import { queueKeys } from 'src/common/constant/queue-keys';
+import { MailerModule } from 'src/common/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { queueKeys } from 'src/common/constant/queue-keys';
     AuthModule,
     JwtModule,
     EncryptionModule,
+    MailerModule,
     BullModule.registerQueue({
       name: queueKeys.walletQueue,
     }),
