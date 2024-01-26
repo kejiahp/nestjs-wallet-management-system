@@ -161,8 +161,7 @@ export class WalletService {
       await this.walletQueue.add(namedJobQueueKeys.chargeSuccess, {
         payload,
       });
-
-      return {};
     }
+    return {};
   }
 }

@@ -10,6 +10,7 @@ import { EncryptionModule } from 'src/common/encryption/encryption.module';
 import { BullModule } from '@nestjs/bull';
 import { queueKeys } from 'src/common/constant/queue-keys';
 import { MailerModule } from 'src/common/mailer/mailer.module';
+import { WalletConsumer } from './queues/wallet.consumer';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { MailerModule } from 'src/common/mailer/mailer.module';
     }),
   ],
   controllers: [WalletController, ProtectedWalletController],
-  providers: [WalletService],
+  providers: [WalletService, WalletConsumer],
 })
 export class WalletModule {}

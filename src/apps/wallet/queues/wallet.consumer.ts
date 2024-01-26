@@ -11,7 +11,7 @@ import { Utilities } from 'src/common/utils/utilities';
 import { MailerRepositories } from 'src/common/mailer/mailer.repositories';
 
 @Processor(queueKeys.walletQueue)
-export class DepositConsumer {
+export class WalletConsumer {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly prisma: PrismaService,
