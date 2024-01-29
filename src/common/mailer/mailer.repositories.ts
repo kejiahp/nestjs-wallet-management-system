@@ -152,4 +152,33 @@ export class MailerRepositories {
       html,
     );
   }
+
+  public async sendTransferOtpCodeMail(code: string, email: string) {
+    const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Withdrawal confirmation otp</title>
+    </head>
+    <body>
+    <h3 style="color:gray;">Hello ${email} below is withdrawal confirmation OTP</h3>
+
+    <p style="font-size:14px;"><span style="font-weight:700;">NOTE:</span> this OTP code expires in one(1) day.</p>
+    <div>
+        <p style="margin: 20px 0px;font-size:24px;font-weight:700;color:purple;">${code}</p>
+    </div>
+    </body>
+    </html>
+    `;
+
+    await this.mailerService.sendEmail(
+      email,
+      'Withdrawal confirmation OTP',
+      `Use this code to withdraw money from your account ${code}`,
+      html,
+    );
+  }
 }

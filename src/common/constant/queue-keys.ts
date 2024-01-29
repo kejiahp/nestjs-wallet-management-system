@@ -8,4 +8,5 @@ export const namedJobQueueKeys = {
   emailVerified: 'email-verified',
   passwordReset: 'password-reset',
   chargeSuccess: 'charge-success',
+  transferInit: 'transfer-init',
 };

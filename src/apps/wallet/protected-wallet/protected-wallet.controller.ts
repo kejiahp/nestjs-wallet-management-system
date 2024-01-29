@@ -1,6 +1,10 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/apps/auth/guards/auth.guard';
-import { CreateWalletDto, DepositMoneyDto } from '../dto/wallet.dto';
+import {
+  CreateWalletDto,
+  DepositMoneyDto,
+  WithdrawDto,
+} from '../dto/wallet.dto';
 import { WalletService } from '../wallet.service';
 import { AuthUserType, RequestAuthUserType } from 'src/apps/auth/types';
 import { Utilities } from 'src/common/utils/utilities';
@@ -41,6 +45,26 @@ export class ProtectedWalletController {
       body.transaction_amount,
       user_email,
       transaction_ref,
+    );
+  }
+
+  @Get('withdraw-otp')
+  async requestOtpForWithdrawal(@CurrentUser() user: AuthUserType) {
+    return await this.walletService.requestOtpForWithdrawalService(
+      user.id,
+      user.email,
+    );
+  }
+
+  @Post('withdraw')
+  async withDrawMoney(
+    @Body() withDrawnDto: WithdrawDto,
+    @CurrentUser() user: AuthUserType,
+  ) {
+    return await this.walletService.withDrawMoneyService(
+      withDrawnDto,
+      user.email,
+      user.id,
     );
   }
 }

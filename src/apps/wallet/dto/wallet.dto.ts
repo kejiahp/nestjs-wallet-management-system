@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
-  IsEnum,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsPositive,
@@ -60,6 +60,25 @@ export class DepositMoneyDto {
 
   @IsNotEmpty()
   @Transform(({ value }) => ('' + value).toUpperCase())
-  @IsEnum(TransactionType)
-  transaction_type: TransactionType;
+  @IsIn(['DEPOSIT'])
+  // @IsEnum(TransactionType)
+  transaction_type: 'DEPOSIT';
+}
+
+export class WithdrawDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  amount: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }) => ('' + value).toUpperCase())
+  @IsIn([TransactionType.WITHDRAWAL])
+  transaction_type: TransactionType.WITHDRAWAL;
+
+  @IsNotEmpty()
+  @IsString()
+  @Length(6, 6, { message: 'otp must be a 6 digit number.' })
+  otp: string;
 }

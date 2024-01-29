@@ -1,7 +1,7 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentService } from 'src/common/payment/payment.service';
-import { CreateWalletDto, TransactionType } from './dto/wallet.dto';
+import { CreateWalletDto, WithdrawDto } from './dto/wallet.dto';
 import ResponseHandler from 'src/common/utils/ResponseHandler';
 import { EncryptionService } from 'src/common/encryption/encryption.service';
 import { ConfigService } from '@nestjs/config';
@@ -9,7 +9,11 @@ import { WebHookEventType } from 'src/common/payment/payment.types';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { namedJobQueueKeys, queueKeys } from 'src/common/constant/queue-keys';
-import { Payload_Type } from './wallet.types';
+import { Payload_Type, PaystackTransferExecptionType } from './wallet.types';
+import { Prisma } from '@prisma/client';
+import { Utilities } from 'src/common/utils/utilities';
+import { AxiosError } from 'axios';
+import { RedisService } from 'src/common/caching/redis/redis.service';
 
 @Injectable()
 export class WalletService {
@@ -19,6 +23,7 @@ export class WalletService {
     private readonly paymentService: PaymentService,
     private readonly encryptionService: EncryptionService,
     private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
   ) {}
 
   public async createWallet(data: CreateWalletDto, user_id: string) {
@@ -50,12 +55,32 @@ export class WalletService {
 
   public async initiatePayment(
     user_id: string,
-    reason: TransactionType,
+    reason: 'DEPOSIT',
     amount: number,
     email: string,
     transaction_ref: string,
     callback_url?: any,
   ) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: {
+        user_id: user_id,
+      },
+    });
+
+    if (!wallet) {
+      return ResponseHandler.error(
+        HttpStatus.NOT_FOUND,
+        'User does not have a wallet',
+      );
+    }
+
+    if (!wallet.recipient_code) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_REQUEST,
+        'User does not have a recipient code, kindly get one',
+      );
+    }
+
     const callback = callback_url ? callback_url : null;
 
     const initPayment = await this.paymentService.initializePayment(
@@ -130,6 +155,144 @@ export class WalletService {
       true,
       'Recipient code successfully added',
     );
+  }
+
+  public async requestOtpForWithdrawalService(user_id: string, email: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { user_id: user_id },
+    });
+
+    if (!wallet) {
+      return ResponseHandler.error(
+        HttpStatus.NOT_FOUND,
+        'user does not have a wallet',
+      );
+    }
+
+    if (wallet.balance <= 0) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_REQUEST,
+        'Insufficent balance',
+      );
+    }
+
+    await this.walletQueue.add(namedJobQueueKeys.transferInit, {
+      email: email,
+    });
+
+    return ResponseHandler.response(
+      HttpStatus.OK,
+      true,
+      'request for otp code successful, kindly check your mail box for an mail containg the code.',
+    );
+  }
+
+  public async withDrawMoneyService(
+    withdrawDto: WithdrawDto,
+    email: string,
+    user_id: string,
+  ) {
+    const otp = await this.redisService.getFromCache(
+      `${email}-${namedJobQueueKeys.transferInit}-otp`,
+    );
+
+    if (!otp) {
+      return ResponseHandler.error(HttpStatus.NOT_FOUND, 'Otp code not found');
+    }
+
+    if (otp !== withdrawDto.otp) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_REQUEST,
+        'Otp codes do not match',
+      );
+    }
+
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const transaction_ref = Utilities.generateReference();
+          const wallet = await this.prisma.wallet.findUnique({
+            where: {
+              user_id: user_id,
+            },
+          });
+
+          if (!wallet) {
+            throw new HttpException(
+              'User does not have a wallet',
+              HttpStatus.NOT_FOUND,
+            );
+          }
+
+          if (!wallet.recipient_code) {
+            throw new HttpException(
+              'User does not have a recipient code, kindly get one',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+
+          if (withdrawDto.amount > wallet.balance) {
+            throw new HttpException(
+              'Insufficent balance',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+
+          const amountInKobo = this.paymentService.convert_naira_to_kobo(
+            withdrawDto.amount,
+          );
+
+          const transfer = await this.paymentService.makeTransferThrow(
+            'balance',
+            withdrawDto.transaction_type,
+            amountInKobo,
+            wallet.recipient_code,
+            transaction_ref,
+          );
+
+          console.log('TRANSFER', transfer);
+
+          if (!transfer || transfer.status === false) {
+            throw new HttpException(
+              `Transaction failed || ${transfer.message}`,
+              HttpStatus.BAD_GATEWAY,
+            );
+          }
+
+          await tx.transaction.create({
+            data: {
+              user_id: user_id,
+              transaction_ref: transaction_ref,
+              transaction_amount: withdrawDto.amount,
+              transaction_type: withdrawDto.transaction_type,
+            },
+          });
+
+          await this.redisService.deleteFromCache(
+            `${email}-${namedJobQueueKeys.transferInit}-otp`,
+          );
+
+          return transfer;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+      );
+    } catch (error: any) {
+      if (error instanceof AxiosError) {
+        const datax: AxiosError<PaystackTransferExecptionType> = error;
+
+        let message = datax.response.data.message;
+
+        if (datax.response.data?.meta?.nextStep) {
+          message += ` || ${datax.response.data.meta.nextStep}`;
+        }
+
+        return ResponseHandler.error(HttpStatus.BAD_GATEWAY, message);
+      } else {
+        throw error;
+      }
+    }
   }
 
   public async webhookService(body: any, X_PAYSTACK_SIGNATURE: string) {

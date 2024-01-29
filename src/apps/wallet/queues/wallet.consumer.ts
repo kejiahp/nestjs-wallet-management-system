@@ -9,6 +9,7 @@ import { Payload_Type } from '../wallet.types';
 import { Prisma } from '@prisma/client';
 import { Utilities } from 'src/common/utils/utilities';
 import { MailerRepositories } from 'src/common/mailer/mailer.repositories';
+import { RedisService } from 'src/common/caching/redis/redis.service';
 
 @Processor(queueKeys.walletQueue)
 export class WalletConsumer {
@@ -16,6 +17,7 @@ export class WalletConsumer {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly prisma: PrismaService,
     private readonly mailRepo: MailerRepositories,
+    private readonly redisService: RedisService,
   ) {}
 
   @Process(namedJobQueueKeys.chargeSuccess)
@@ -23,8 +25,6 @@ export class WalletConsumer {
     this.logger.info(
       `initializing ${namedJobQueueKeys.chargeSuccess} queue for transaction ${job.data.payload.transaction_ref}`,
     );
-
-    console.log('QUEUE PAYLOAD', job.data.payload);
 
     const transaction = await this.prisma.transaction.findUnique({
       where: {
@@ -110,6 +110,30 @@ export class WalletConsumer {
 
     this.logger.info(
       `ended charge ${namedJobQueueKeys.chargeSuccess} queue for transaction ${job.data.payload.transaction_ref}`,
+    );
+
+    return {};
+  }
+
+  @Process(namedJobQueueKeys.transferInit)
+  async sendTransferOtpCode(job: Job<{ email: string }>) {
+    this.logger.info(
+      `initializing ${namedJobQueueKeys.transferInit} queue for user ${job.data.email} transfer otp code`,
+    );
+
+    const ttl = Utilities.daysToSeconds(1);
+    const otp = Utilities.generateRandomNumber(6);
+
+    await this.redisService.savetoCache(
+      `${job.data.email}-${namedJobQueueKeys.transferInit}-otp`,
+      otp,
+      ttl,
+    );
+
+    await this.mailRepo.sendTransferOtpCodeMail(otp, job.data.email);
+
+    this.logger.info(
+      `ended charge ${namedJobQueueKeys.transferInit} queue for user ${job.data.email} transfer otp code`,
     );
 
     return {};

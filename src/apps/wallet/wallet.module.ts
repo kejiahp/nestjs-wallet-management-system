@@ -11,6 +11,7 @@ import { BullModule } from '@nestjs/bull';
 import { queueKeys } from 'src/common/constant/queue-keys';
 import { MailerModule } from 'src/common/mailer/mailer.module';
 import { WalletConsumer } from './queues/wallet.consumer';
+import { RedisModule } from 'src/common/caching/redis/redis.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { WalletConsumer } from './queues/wallet.consumer';
     JwtModule,
     EncryptionModule,
     MailerModule,
+    RedisModule,
     BullModule.registerQueue({
       name: queueKeys.walletQueue,
     }),

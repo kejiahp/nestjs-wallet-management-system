@@ -176,12 +176,14 @@ export class PaymentService {
     reason: string,
     amount: number,
     recipient: string,
+    reference: string,
   ): Promise<any> {
     const params = {
       source,
       reason,
       amount,
       recipient,
+      reference,
     };
 
     const options = {
@@ -195,6 +197,98 @@ export class PaymentService {
       const response = await axios.post(
         `${this.apiBaseUrl}/transfer`,
         params,
+        options,
+      );
+      return response.data;
+    } catch (error) {
+      // Handle error here
+      return error.response.data;
+    }
+  }
+
+  async makeTransferThrow(
+    source: string,
+    reason: string,
+    amount: number,
+    recipient: string,
+    reference: string,
+  ): Promise<any> {
+    const params = {
+      source,
+      reason,
+      amount,
+      recipient,
+      reference,
+    };
+
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await axios.post(
+      `${this.apiBaseUrl}/transfer`,
+      params,
+      options,
+    );
+    return response.data;
+  }
+
+  async getDisableTransferOtpCode() {
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    try {
+      const response = await axios.post(
+        `${this.apiBaseUrl}/transfer/disable_otp`,
+        {},
+        options,
+      );
+      return response.data;
+    } catch (error) {
+      // Handle error here
+      return error.response.data;
+    }
+  }
+
+  async disableOtp(otpCode: string) {
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    try {
+      const response = await axios.post(
+        `${this.apiBaseUrl}/transfer/disable_otp_finalize`,
+        { otp: otpCode },
+        options,
+      );
+      return response.data;
+    } catch (error) {
+      // Handle error here
+      return error.response.data;
+    }
+  }
+
+  async enableOtp() {
+    const options = {
+      headers: {
+        Authorization: `Bearer ${this.secretKey}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    try {
+      const response = await axios.post(
+        `${this.apiBaseUrl}/transfer/enable_otp`,
+        {},
         options,
       );
       return response.data;

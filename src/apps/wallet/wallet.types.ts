@@ -4,3 +4,13 @@ export type Payload_Type = {
   amount: number;
   email: string;
 };
+
+export type PaystackTransferExecptionType = {
+  status: boolean;
+  message: string;
+  meta: {
+    nextStep: string;
+  };
+  type: string;
+  code: string;
+};
