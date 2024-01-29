@@ -16,5 +16,12 @@ This project was built using a progressive nodejs framework, [Nestjs](https://ne
 - Lock their money, escrow stuff.
 - Setup dynamic schedules to hold users money for a specified period of time.
 - Release users money back into there wallet once the time is right.
+- I guess thats all
 
-I guess thats all
+##### Run the project
+
+- Create a .env file in the project root directory.
+- Ensure all the environment variables are provided as described in the [env.example.txt](https://github.com/kejiahp/wallet-management-system/blob/5f9d39767551b8378667a34a09ce78656535a2c0/env.example.txt, 'env.example.txt') file.
+- run `docker compose up -d`
+- run `npm run start:dev`
+- server should be runing on [http://localhost:<PORT>/api/v1](http://localhost:<PORT>/api/v1)
