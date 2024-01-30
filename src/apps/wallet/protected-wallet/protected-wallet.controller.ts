@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/apps/auth/guards/auth.guard';
 import {
   CreateWalletDto,
@@ -28,6 +36,22 @@ export class ProtectedWalletController {
   async setRecipientCode(@Req() req: RequestAuthUserType) {
     const user_id = req.user.id;
     return await this.walletService.addRecipientCode(user_id);
+  }
+
+  @Get('get-wallet')
+  async getWallet(@CurrentUser() user: AuthUserType) {
+    return await this.walletService.getWalletService(user.id);
+  }
+
+  @Get('transaction-history')
+  async getTransactionHistory(
+    @CurrentUser() user: AuthUserType,
+    @Query() query: Record<string, string>,
+  ) {
+    return await this.walletService.getTransactionHistoryService(
+      user.id,
+      query,
+    );
   }
 
   @Post('deposit-money')

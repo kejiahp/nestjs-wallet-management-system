@@ -9,11 +9,16 @@ import { WebHookEventType } from 'src/common/payment/payment.types';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { namedJobQueueKeys, queueKeys } from 'src/common/constant/queue-keys';
-import { Payload_Type, PaystackTransferExecptionType } from './wallet.types';
+import {
+  Payload_Type,
+  PaystackTransferExecptionType,
+  WalletTransactionType,
+} from './wallet.types';
 import { Prisma } from '@prisma/client';
 import { Utilities } from 'src/common/utils/utilities';
 import { AxiosError } from 'axios';
 import { RedisService } from 'src/common/caching/redis/redis.service';
+import calculatePagination from 'src/common/utils/pagination';
 
 @Injectable()
 export class WalletService {
@@ -51,6 +56,86 @@ export class WalletService {
         account_number: data.account_number,
       },
     });
+  }
+
+  public async getWalletService(user_id: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: {
+        user_id: user_id,
+      },
+    });
+
+    if (!wallet) {
+      return ResponseHandler.error(
+        HttpStatus.NOT_FOUND,
+        'User does not have a wallet.',
+      );
+    }
+
+    return ResponseHandler.response(
+      HttpStatus.OK,
+      true,
+      'User wallet found',
+      wallet,
+    );
+  }
+
+  public async getTransactionHistoryService(
+    user_id: string,
+    query: Record<string, string>,
+  ) {
+    const { page, limit, type } = query;
+    const pageNo = parseInt(page) || 1;
+    const limitNo = parseInt(limit) || 10;
+    const transactionType = (type || '') as WalletTransactionType;
+
+    const allowedTransactionTypes = ['WITHDRAWAL', 'ESCROW', 'DEPOSIT'];
+
+    if (
+      !transactionType ||
+      !allowedTransactionTypes.includes(transactionType)
+    ) {
+      return ResponseHandler.error(
+        HttpStatus.BAD_REQUEST,
+        'Invalid transaction type, allowed options are ' +
+          allowedTransactionTypes.join(','),
+      );
+    }
+
+    let skipNo = 0;
+    if (pageNo > 1) {
+      skipNo = (pageNo - 1) * limitNo;
+    }
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        user_id: user_id,
+        transaction_type: transactionType,
+      },
+      skip: skipNo,
+      take: limitNo,
+    });
+
+    const count = await this.prisma.transaction.count({
+      where: {
+        user_id: user_id,
+        transaction_type: transactionType,
+      },
+    });
+
+    const pagination = calculatePagination(
+      transactions,
+      count,
+      pageNo,
+      limitNo,
+    );
+
+    return ResponseHandler.response(
+      HttpStatus.OK,
+      true,
+      'Transactions result',
+      pagination,
+    );
   }
 
   public async initiatePayment(

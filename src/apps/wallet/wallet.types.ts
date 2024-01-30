@@ -1,5 +1,7 @@
+export type WalletTransactionType = 'WITHDRAWAL' | 'ESCROW' | 'DEPOSIT';
+
 export type Payload_Type = {
-  forWhat: 'WITHDRAWAL' | 'ESCROW' | 'DEPOSIT';
+  forWhat: WalletTransactionType;
   transaction_ref: string;
   amount: number;
   email: string;
