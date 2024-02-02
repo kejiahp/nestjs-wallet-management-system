@@ -70,7 +70,7 @@ jobs:
         shell: bash
 
       - name: Copy docker-compose.prod to runner
-        run: curl https://raw.githubusercontent.com/kejiahp/wallet-management-system/master/docker-compose.prod.yml --output docker-compose.yml
+        run: curl https://raw.githubusercontent.com/kejiahp/nestjs-wallet-management-system/master/docker-compose.prod.yml --output docker-compose.yml
 
       - name: Stop all conatainers
         run: docker compose -p ${DOCKER_PROJECT_NAME} stop
